@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>   
+    <meta charset="utf-8" />   
+    <title>Roulette vs. FPTP</title>      
+    <script src='/static/Chart.min.js'></script>   
+  </head>
+
+  <body>
+    <h1>UK General Elections:</h1>
+    <h1>Using a Roulette Wheel to Pick Winners vs. First Past The Post</h1>
+    
+    <h2>Simulated Results using a roulette wheel, by number of MPs</h2>
+    <p>Ideally this would not be run till the user presses a button</p>
+    <p>Also need to work out percentage error</p>
+    <p>Also need a nice blurb about what's going on here</p>
+    <p>Maybe put these at the bottom after the big blurb, and tell user to refresh to see a new simulation</p>
+
+    <p>The simulated results use a roulette wheel approach to designate which candidate wins in each constituency.</p>
+    <p>What is means is that after all votes are counted, we take out a roulette wheel, then mark out a percentage of the wheel for each candidate depending on how they performed.</p>
+    <p>So if the Conservative candidate got 40% of the vote, he's given 40% of the spaces on the wheel, etc. </p>
+    <p>Then we spin the wheel, and whoever's spot the ball lands on wins the election and becomes that constituency's MP.</p>
+    <p>Is this a good way of running the election? God no! But yet, it consistantly outperforms FPTP in getting closer to the country's popular vote.</p>
+    <p>In fact, after running 1,000,000 simulations, the roulette wheel had a %-age error rate of x%, compared to the actual %-age error rate of y given in the actual election.</p>
+
+    <p>So what can we do? We should change the voting system to something like STV, used in Ireland, so the wishes of the people in the country are actually seen in the House of Commons.</p>
+
+    <p>Wanna see a new simulated result? <a href="http://127.0.0.1:5000/projects/roulette/">Refresh</a> the page.</p>
+    <canvas id="chartSim" width="600" height="400"></canvas>
+    
+    <h2>Populate Vote, by percentage</h2>
+    <canvas id="chartReal" width="600" height="400"></canvas>
+    
+    <h2>Actual MPs awarded using FPTP</h2>
+    <canvas id="chartActual" width="600" height="400"></canvas>
+    
+    <script>
+        
+        var pieSimulated = [];
+        var pieReal = [];
+        var pieActual = [];
+
+        {% for itemSim,labelSim,colorsSim, itemReal,labelReal,colorsReal, itemActual,labelActual,colorsActual in set %}
+        
+        pieSimulated.push({
+          value: {{itemSim}},
+          label: "{{labelSim}}",
+          color : "{{colorsSim}}"
+        });
+
+        pieReal.push({
+          value: {{itemReal}},
+          label: "{{labelReal}}",
+          color : "{{colorsReal}}"
+        });
+
+        pieActual.push({
+          value: {{itemActual}},
+          label: "{{labelActual}}",
+          color : "{{colorsActual}}"
+        });
+
+        {% endfor %} 
+
+
+        // get chart canvas
+        var chartSim = document.getElementById("chartSim").getContext("2d");
+        var chartReal = document.getElementById("chartReal").getContext("2d");
+        var chartActual = document.getElementById("chartActual").getContext("2d");
+        steps = 10
+        max = 10
+        // draw pie chart
+        new Chart(document.getElementById("chartSim").getContext("2d")).Pie(pieSimulated);
+        new Chart(document.getElementById("chartReal").getContext("2d")).Pie(pieReal);
+        new Chart(document.getElementById("chartActual").getContext("2d")).Pie(pieActual);
+ 
+    </script>
+
+    <p>This was made using Flask and Chart.js</p>
+  </body>
+</html>

@@ -18,10 +18,10 @@ actual votes by general population
 
 Map of UK coloured in by voters
 """
-from pylab import *
+#from pylab import *
 import csv, random
 
-data_file = open('RESULTS.csv')
+data_file = open('RESULTS.csv', encoding = "ISO-8859-2")
 reader = csv.reader(data_file)
 data = list(reader)
 
@@ -68,10 +68,10 @@ for constituency in constituencies:
         parties[ind][1] += 1 #Add the MP to its parties total
     except Exception as err:
         #print "Error! - there's always one (I think the first or last) thats always empty"
-        print "" 
+        print("") 
 
 
-print parties[0]
+print(parties[0])
 
 
 """ Something going wrong in here, I'll sort it out later
@@ -90,19 +90,93 @@ def makeSimplePieChart(parties):
             labels.append(party[0])
             fracs.append(float(party[1])/650.0*100.0)
             explode.append(0)
-    print fracs
-    print labels
-    print explode
+    print(fracs)
+    print(labels)
+    print(explode)
     pie(fracs, explode=explode, labels=labels, autopct='%1.1%%', shadow=False, startangle=90)
     title('Roulette election results', bbox={'facecolor':'0.8','pad':5}) 
     show()  
+
+def runSimulation():
+    data_file = open('RESULTS.csv', encoding = "ISO-8859-2")
+    reader = csv.reader(data_file)
+    data = list(reader)
+
+    constituencies = [[] for i in range(651)]
+    parties = []
+
+    #get all the parties
+    for row in data:
+        if row[4] != 'PANO' and row[4] != '':
+            constituencies[int(row[4])].append(row)
+            if [row[18],0] not in parties:
+                parties.append([row[18], 0])
+
+
+    for constituency in constituencies:
+        total = 0
+
+        for row in constituency:
+            #5 is number of votes achieved
+            total += int(row[5])
+
+        prev_prob = 0.0
+        probs = []
+
+        for row in constituency:
+            prob = prev_prob + (float(row[5]) / total) 
+            probs.append(prob)
+            prev_prob = prob
+
+        rand = random.random() # Run the roulette
+
+        count = 0
+        choice = 0
+
+        while count < len(probs):
+            if probs[count] < rand:
+                count += 1
+            else:
+                choice = count # This is the MP we've picked
+                break
+
+        try: 
+            ind = next((i for i, sublist in enumerate(parties) if constituency[choice][18] in sublist), -1)
+            parties[ind][1] += 1 #Add the MP to its parties total
+        except Exception as err:
+            #print "Error! - there's always one (I think the first or last) thats always empty"
+            print("") 
+
+
+    print(parties[0])
+    print("")
+    print("% of MPs gained:")
+    print(float(parties[0][1])/650.0*100.0)
+    print("")
+    print("% of MPs gained in reality")
+    print(330.0/650.0*100.0)
+    print("Actual popular vote: 36.9%")
     
-print ""
-print "% of MPs gained:"
-print float(parties[0][1])/650.0*100.0
-print ""
-print "% of MPs gained in reality"
-print 330.0/650.0*100.0
-print "Actual popular vote: 36.9%"
+    names = []
+    mps = []
+    colours = []
+    r = lambda: random.randint(0,255)
+
+    for x in parties:
+        names.append(x[0])
+        mps.append(x[1])
+        colours.append('#%02X%02X%02X' % (r(),r(),r()))    
+    return names, mps, colours
+    
+print("")
+print("% of MPs gained:")
+print(float(parties[0][1])/650.0*100.0)
+print("")
+print("% of MPs gained in reality")
+print(330.0/650.0*100.0)
+print("Actual popular vote: 36.9%")
+
+names, mps, colors = runSimulation()
+print(colors)
 
 #makeSimplePieChart(parties)
